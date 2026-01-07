@@ -1,10 +1,9 @@
-import { Link, useParams, useNavigate } from "react-router-dom"; // Added useNavigate
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext.jsx";
 import { getCharacterById } from "../api/character.js";
 import { getMessagesByConversationId } from "../api/conversation.js";
-// Added MessageCircle and Lock for professional UI
 import { MessageCircle, Lock, ArrowLeft } from "lucide-react"; 
 
 const DEFAULT_AVATAR = "/default-avatar.png";
@@ -12,12 +11,12 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export default function ChatPage() {
   const { characterId } = useParams();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useUser();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Controls the AI waiting indicator
   const [character, setCharacter] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -27,16 +26,16 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior });
   }, []);
 
+  // FIXED: Added 'loading' to dependency array to auto-scroll when dots appear
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages, loading, scrollToBottom]);
 
   useEffect(() => {
     const initChat = async () => {
       try {
         const [charRes, msgRes] = await Promise.all([
           getCharacterById(characterId),
-          // Only fetch messages if user is logged in
           user ? getMessagesByConversationId(characterId) : Promise.resolve({ data: { messages: [] } }),
         ]);
 
@@ -57,10 +56,9 @@ export default function ChatPage() {
     };
 
     if (characterId) initChat();
-  }, [characterId, user]); // Added user to dependency
+  }, [characterId, user]);
 
   const sendMessage = useCallback(async () => {
-    // 1. BLOCK: Check if user is logged in
     if (!user) {
       alert("Please login to start a conversation!");
       navigate("/login");
@@ -73,7 +71,7 @@ export default function ChatPage() {
     const userMsg = { sender: "user", message: trimmedInput };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setLoading(true);
+    setLoading(true); // Triggers the typing indicator dots
 
     try {
       const res = await axios.post(
@@ -94,7 +92,7 @@ export default function ChatPage() {
         )
       );
     } finally {
-      setLoading(false);
+      setLoading(false); // Hides the typing indicator dots
     }
   }, [input, loading, characterId, user, navigate]);
 
@@ -191,13 +189,31 @@ export default function ChatPage() {
             </div>
           </div>
         ))}
+
+        {/* AI WAITING INDICATOR: Visible on all screen sizes when loading */}
+        {loading && (
+          <div className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 bg-zinc-900 flex-shrink-0">
+              <img 
+                src={getAvatarUrl(character?.avatar)} 
+                className="w-full h-full object-cover grayscale-[0.2]" 
+                alt="Character Typing" 
+              />
+            </div>
+            <div className="flex gap-1.5 px-5 py-4 bg-white/[0.05] border border-white/10 rounded-2xl rounded-tl-none backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" />
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} className="h-4" />
       </main>
 
-      {/* INPUT AREA / LOGIN OVERLAY */}
+      {/* FOOTER */}
       <footer className="p-4 md:p-8 bg-[#05050c] border-t border-white/5 relative">
         {!user ? (
-          /* Professional Login Prompt Overlay */
           <div className="max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-md border border-dashed border-purple-500/30 p-6 rounded-3xl flex flex-col items-center text-center gap-3 animate-in fade-in zoom-in-95 duration-500">
             <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400">
                 <Lock size={24} />
