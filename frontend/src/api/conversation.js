@@ -1,8 +1,9 @@
 import axios from "axios";
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || "";
 
 const MessageAPI = axios.create({
-  baseURL: "https://knox-backend-2.onrender.com/api/chat",
+  baseURL: `${baseURL}/api/chat`,
   withCredentials: true,
 });
 

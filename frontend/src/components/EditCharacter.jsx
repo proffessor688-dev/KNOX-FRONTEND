@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// FIXED: Use Vite's environment variable syntax to prevent "process is not defined"
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 function EditCharacter() {
   const { id } = useParams();
@@ -19,15 +21,16 @@ function EditCharacter() {
   useEffect(() => {
     const fetchCharacter = async () => {
       try {
-        const res = await axios.get(
-          `https://knox-backend-2.onrender.com/api/character/${id}`,
-          { withCredentials: true }
-        );
-        // Assuming your backend returns an object inside 'characters'
-        setFormData(res.data.characters);
+        // FIXED: Ensure URL structure matches your GET route
+        const res = await axios.get(`${BACKEND_URL}/api/character/${id}`, {
+          withCredentials: true,
+        });
+        
+        // Use res.data.character or res.data depending on your exact backend return
+        setFormData(res.data.character || res.data);
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        console.error("Fetch error:", error);
         setLoading(false);
       }
     };
@@ -41,16 +44,15 @@ function EditCharacter() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `https://knox-backend-2.onrender.com/api/character/edit/${id}`,
-        formData,
-        { withCredentials: true }
-      );
+      // FIXED: Path updated to match standard PUT route structure
+      await axios.put(`${BACKEND_URL}/api/character/edit/${id}`, formData, {
+        withCredentials: true,
+      });
       alert("✨ Character refined successfully!");
       navigate("/Explore");
     } catch (error) {
-      console.error(error);
-      alert("❌ Failed to update character");
+      console.error("Update error:", error);
+      alert(error.response?.data?.message || "❌ Failed to update character");
     }
   };
 
@@ -74,7 +76,6 @@ function EditCharacter() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#05050c] p-4 sm:p-6 relative overflow-hidden">
       
-      {/* 1. Fixed Back Arrow Button */}
       <button
         onClick={() => navigate(-1)}
         className="fixed top-4 left-4 sm:top-6 sm:left-6 z-[100] 
@@ -96,11 +97,9 @@ function EditCharacter() {
         <span className="hidden md:block ml-2 text-sm font-bold pr-1">Back</span>
       </button>
 
-      {/* Background Ambient Glows */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-      {/* Main Form Container */}
       <form
         onSubmit={handleSubmit}
         className="relative w-full max-w-xl bg-white/[0.03] backdrop-blur-2xl border border-white/10 
@@ -118,12 +117,11 @@ function EditCharacter() {
         </div>
 
         <div className="space-y-5">
-          {/* Name Field */}
           <div>
             <label className={labelClasses}>Character Name</label>
             <input
               name="name"
-              value={formData.name}
+              value={formData.name || ""}
               onChange={handleChange}
               placeholder="e.g. Luna Moonstone"
               className={inputClasses}
@@ -131,43 +129,39 @@ function EditCharacter() {
             />
           </div>
 
-          {/* Tagline/Description */}
           <div>
             <label className={labelClasses}>Description / Tagline</label>
             <textarea
               name="description"
-              value={formData.description}
+              value={formData.description || ""}
               onChange={handleChange}
               placeholder="A short tagline..."
               className={`${inputClasses} resize-none h-20`}
             />
           </div>
 
-          {/* Personality Field */}
           <div>
             <label className={labelClasses}>Personality & Traits</label>
             <textarea
               name="personality"
-              value={formData.personality}
+              value={formData.personality || ""}
               onChange={handleChange}
               placeholder="How do they act? What are their quirks?"
               className={`${inputClasses} resize-none h-28`}
             />
           </div>
 
-          {/* Greeting Field */}
           <div>
             <label className={labelClasses}>First Greeting</label>
             <textarea
               name="greeting"
-              value={formData.greeting}
+              value={formData.greeting || ""}
               onChange={handleChange}
               placeholder="What's the first thing they say to a stranger?"
               className={`${inputClasses} resize-none h-24`}
             />
           </div>
 
-          {/* Action Buttons - Optimized for Responsive */}
           <div className="flex flex-col sm:flex-row gap-4 mt-6">
             <button
               type="button"

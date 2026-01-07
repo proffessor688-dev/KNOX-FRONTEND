@@ -4,6 +4,8 @@ import { useUser } from "../context/UserContext";
 import axios from "axios";
 import { Camera, Mail, User, Save, Edit2, ArrowLeft, Loader2 } from "lucide-react";
 
+// FIXED: Ensure BACKEND_URL falls back to an empty string to avoid "undefined" errors
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const ProfilePage = () => {
   const { user, setUser, loading } = useUser();
@@ -19,7 +21,13 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       setName(user.name || "");
-      setPreviewUrl(user.avatar ? `https://knox-backend-2.onrender.com${user.avatar}` : "");
+      // FIXED: Safely handle the avatar URL construction
+      if (user.avatar) {
+        const fullUrl = user.avatar.startsWith('http') ? user.avatar : `${BACKEND_URL}${user.avatar}`;
+        setPreviewUrl(fullUrl);
+      } else {
+        setPreviewUrl("");
+      }
     }
   }, [user]);
 
@@ -40,7 +48,8 @@ const ProfilePage = () => {
     if (avatar) formData.append("avatar", avatar);
 
     try {
-      const res = await axios.put("https://knox-backend-2.onrender.com/api/auth/update", formData, {
+      // FIXED: Ensure the PUT route matches your backend's update endpoint
+      const res = await axios.put(`${BACKEND_URL}/api/auth/update`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -50,22 +59,24 @@ const ProfilePage = () => {
       setIsEditing(false);
       alert("Profile updated! ✨");
     } catch (err) {
-      console.error(err);
-      alert("Update failed.");
+      console.error("Update error:", err);
+      alert(err.response?.data?.message || "Update failed.");
     } finally {
       setUpdating(false);
     }
   };
 
-  if (loading) return <div className="h-screen bg-[#05050c] flex items-center justify-center"><Loader2 className="animate-spin text-purple-500" /></div>;
+  if (loading) return (
+    <div className="h-screen bg-[#05050c] flex items-center justify-center">
+      <Loader2 className="animate-spin text-purple-500" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#05050c] text-white p-4 sm:p-6 relative overflow-x-hidden flex flex-col items-center">
-      {/* Background Decor - Scaled for mobile */}
       <div className="absolute top-0 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-indigo-600/10 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-xl mt-4 sm:mt-10 relative z-10">
-        {/* Back Button */}
         <button 
           onClick={() => navigate(-1)} 
           className="mb-4 sm:mb-6 flex items-center gap-2 text-slate-500 hover:text-white transition-colors group text-sm sm:text-base"
@@ -77,7 +88,6 @@ const ProfilePage = () => {
         <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-10 shadow-2xl">
           <form onSubmit={handleUpdate} className="space-y-6 sm:space-y-8">
             
-            {/* Avatar Section */}
             <div className="flex flex-col items-center gap-3 sm:gap-4">
               <div className="relative group">
                 <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden border-2 border-white/10 bg-zinc-900 shadow-2xl transition-transform duration-500 group-hover:scale-105">
@@ -105,7 +115,6 @@ const ProfilePage = () => {
             </div>
 
             <div className="space-y-4 sm:space-y-5">
-              {/* Name Field */}
               <div className="space-y-1.5 sm:space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Full Name</label>
                 <div className="relative">
@@ -121,7 +130,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Email Field */}
               <div className="space-y-1.5 sm:space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Email Address</label>
                 <div className="relative">
@@ -135,7 +143,6 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
               {!isEditing ? (
                 <button
@@ -151,7 +158,12 @@ const ProfilePage = () => {
                     type="button"
                     onClick={() => {
                       setIsEditing(false);
-                      setPreviewUrl(user.avatar ? `https://knox-backend-2.onrender.com${user.avatar}` : "");
+                      // Reset preview to original
+                      const originalUrl = user.avatar 
+                        ? (user.avatar.startsWith('http') ? user.avatar : `${BACKEND_URL}${user.avatar}`)
+                        : "";
+                      setPreviewUrl(originalUrl);
+                      setName(user.name || "");
                     }}
                     className="w-full sm:flex-1 py-3 sm:py-4 border border-white/10 rounded-xl sm:rounded-2xl font-bold hover:bg-white/5 transition-all text-sm order-2 sm:order-1"
                   >
