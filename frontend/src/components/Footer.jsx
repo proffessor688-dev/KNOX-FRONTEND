@@ -24,7 +24,7 @@ const Footer = () => {
     },
     {
       name: "Instagram",
-      url: "https://www.instagram.com/shubham_vats_a",
+      url: "https://www.instagram.com/imshubham_vats",
       color: "hover:text-pink-500",
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
