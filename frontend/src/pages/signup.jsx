@@ -2,7 +2,9 @@ import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 export default function Signup() {
   const [formData, setFormData] = useState({
     name: "",
@@ -25,6 +27,30 @@ export default function Signup() {
     setSuccessMsg("");
     setErrorMsg("");
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(formData.email)) {
+      setErrorMsg("Please enter a valid email address.");
+
+      setTimeout(() => {
+        setErrorMsg("");
+      }, 3000);
+
+      return;
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters long.");
+
+      setTimeout(() => {
+        setErrorMsg("");
+      }, 3000);
+
+      return;
+    }
+
     try {
       const res = await axios.post(
         `${baseURL}/api/auth/signup`,
@@ -32,13 +58,21 @@ export default function Signup() {
       );
 
       setSuccessMsg(res.data.message || "Signup successful!");
-      
+
+      // Clear form after successful signup
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+      });
+
       setTimeout(() => {
         setSuccessMsg("");
       }, 3000);
-
     } catch (err) {
-      const msg = err.response?.data?.message || "Signup failed!";
+      const msg =
+        err.response?.data?.message || "Signup failed!";
+
       setErrorMsg(msg);
 
       setTimeout(() => {
@@ -47,9 +81,11 @@ export default function Signup() {
     }
   };
 
-  // Consistent Styling Classes
-  const inputClasses = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/50 transition-all duration-300 hover:bg-white/10";
-  const labelClasses = "block text-xs font-semibold text-slate-400 mb-1.5 ml-1 uppercase tracking-wider";
+  const inputClasses =
+    "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/50 transition-all duration-300 hover:bg-white/10";
+
+  const labelClasses =
+    "block text-xs font-semibold text-slate-400 mb-1.5 ml-1 uppercase tracking-wider";
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#05050c] p-6 relative overflow-hidden">
@@ -62,16 +98,19 @@ export default function Signup() {
           <h2 className="text-3xl font-bold bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent tracking-tight">
             Join the Forge
           </h2>
-          <p className="text-slate-500 mt-2 text-sm font-medium">Create your legend today</p>
+          <p className="text-slate-500 mt-2 text-sm font-medium">
+            Create your legend today
+          </p>
         </div>
 
-        {/* Feedback Messages */}
+        {/* Success Message */}
         {successMsg && (
           <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm font-medium text-center p-3 rounded-xl mb-6">
             {successMsg}
           </div>
         )}
 
+        {/* Error Message */}
         {errorMsg && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm font-medium text-center p-3 rounded-xl mb-6">
             {errorMsg}
@@ -79,12 +118,12 @@ export default function Signup() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Name */}
           <div className="group">
             <label className={labelClasses}>Full Name</label>
             <input
               type="text"
               name="name"
-              placeholder="e.g. John Doe"
               value={formData.name}
               onChange={handleChange}
               className={inputClasses}
@@ -92,6 +131,7 @@ export default function Signup() {
             />
           </div>
 
+          {/* Email */}
           <div className="group">
             <label className={labelClasses}>Email Address</label>
             <input
@@ -105,20 +145,22 @@ export default function Signup() {
             />
           </div>
 
+          {/* Password */}
           <div className="group">
             <label className={labelClasses}>Password</label>
             <input
               type="password"
               name="password"
-              placeholder="••••••••"
+              placeholder="Minimum 8 characters"
               value={formData.password}
               onChange={handleChange}
               className={inputClasses}
+              minLength={8}
               required
             />
           </div>
 
-          {/* PURPLE THEME BUTTON */}
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-4 mt-4 rounded-xl font-bold text-white transition-all duration-500 
@@ -131,7 +173,10 @@ export default function Signup() {
 
         <p className="text-center text-slate-400 mt-8 text-sm">
           Already have an account?{" "}
-          <Link to="/login" className="text-purple-400 font-semibold hover:text-pink-400 transition-colors hover:underline underline-offset-4">
+          <Link
+            to="/login"
+            className="text-purple-400 font-semibold hover:text-pink-400 transition-colors hover:underline underline-offset-4"
+          >
             Log In
           </Link>
         </p>
