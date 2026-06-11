@@ -59,7 +59,7 @@ const Footer = () => {
         <p className="text-[10px] text-slate-600 font-medium tracking-wide">
           © 2026 KNOX • Built with 
           <span className="inline-block mx-1 text-red-500 animate-pulse">❤</span> 
-          by <span className="text-slate-400 font-bold">Shubham Vats</span>
+          by <span className="text-slate-400 font-bold">Team KNOX</span>
         </p>
       </div>
     </div>
