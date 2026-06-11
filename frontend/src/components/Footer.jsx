@@ -4,7 +4,7 @@ const Footer = () => {
   const socialLinks = [
     {
       name: "GitHub",
-      url: "https://github.com/proffessor688-dev",
+      url: "https://knox-frontend.vercel.app/Explore",
       color: "hover:text-white",
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -14,7 +14,7 @@ const Footer = () => {
     },
     {
       name: "LinkedIn",
-      url: "https://linkedin.com/in/shubham-kumar-41330b2b1",
+      url: "https://knox-frontend.vercel.app/Explore",
       color: "hover:text-blue-400",
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ const Footer = () => {
     },
     {
       name: "Instagram",
-      url: "https://www.instagram.com/imshubham_vats",
+      url: "https://knox-frontend.vercel.app/Explore",
       color: "hover:text-pink-500",
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
